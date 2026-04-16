@@ -31,3 +31,4 @@ C:\Users\danie\Desktop\MyFullstackApp\backend\obj\Debug\net10.0\refint\backend.d
 C:\Users\danie\Desktop\MyFullstackApp\backend\obj\Debug\net10.0\backend.pdb
 C:\Users\danie\Desktop\MyFullstackApp\backend\obj\Debug\net10.0\backend.genruntimeconfig.cache
 C:\Users\danie\Desktop\MyFullstackApp\backend\obj\Debug\net10.0\ref\backend.dll
+C:\Users\danie\Desktop\MyFullstackApp\backend\obj\Debug\net10.0\backend.sourcelink.json
