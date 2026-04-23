@@ -3,9 +3,20 @@ services:
     build: ./backend
     ports:
       - "5003:8080"
+    networks:
+      - dev_network
+
   web:
     build: ./frontend
     ports:
       - "3000:3000"
     depends_on:
       - api
+    networks:
+      - prod_network
+
+networks:
+  dev_network:
+    driver: bridge
+  prod_network:
+    driver: bridge
