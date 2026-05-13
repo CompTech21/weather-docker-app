@@ -1,8 +1,8 @@
+using RabbitMQ.Client;
+using System.Text;
+using System.Text.Json;
+
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-
 
 builder.Services.AddCors(options =>
 {
@@ -14,13 +14,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-
 app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
 
 var summaries = new[]
@@ -28,9 +24,9 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", async () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
@@ -38,6 +34,24 @@ app.MapGet("/weatherforecast", () =>
             summaries[Random.Shared.Next(summaries.Length)]
         ))
         .ToArray();
+
+    try
+    {
+        var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+        using var connection = await factory.CreateConnectionAsync();
+        using var channel = await connection.CreateChannelAsync();
+
+        await channel.QueueDeclareAsync(queue: "weather_logs", durable: false, exclusive: false, autoDelete: false, arguments: null);
+
+        var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { Event = "WeatherRequested", Time = DateTime.Now }));
+
+        await channel.BasicPublishAsync(exchange: "", routingKey: "weather_logs", body: body);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Rabbit Error: {ex.Message}");
+    }
+
     return forecast;
 })
 .WithName("GetWeatherForecast");

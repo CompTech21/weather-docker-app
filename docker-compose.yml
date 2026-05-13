@@ -1,8 +1,19 @@
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - dev_network
+
   api:
     build: ./backend
     ports:
       - "5003:8080"
+    depends_on:
+      - rabbitmq
     networks:
       - dev_network
 
@@ -13,10 +24,8 @@ services:
     depends_on:
       - api
     networks:
-      - prod_network
+      - dev_network
 
 networks:
   dev_network:
-    driver: bridge
-  prod_network:
     driver: bridge
